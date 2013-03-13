@@ -1,0 +1,10 @@
+LM4F-MSC-BASE
+===================
+
+INSTALLATION:
+
+* install the openocd at http://openocd.zylin.com/openocd
+* install the arm-none-eabi toolchain and add it to your path
+* Run make
+* Flash gcc/boot_usb_msc.bin onto your Launchpad or other Stellaris board
+
