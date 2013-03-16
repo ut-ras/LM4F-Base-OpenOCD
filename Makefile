@@ -38,7 +38,8 @@
 PREFIX_ARM = arm-none-eabi
 
 # Microcontroller properties.
-PART=LM4F120H5QR
+PART=LM4F120
+OPENOCD_PART =  ${shell find /usr/share/openocd/scripts/ -iname *${PART}*}
 CPU=-mcpu=cortex-m4
 FPU=-mfpu=fpv4-sp-d16 -mfloat-abi=softfp
 
@@ -58,21 +59,6 @@ OD      = ${PREFIX_ARM}-objdump
 CFLAGS=-mthumb ${CPU} ${FPU} -Os -ffunction-sections -fdata-sections -MD -std=c99 -Wall -pedantic -c -g
 # Library stuff passed as flags!
 CFLAGS+= -I ${STELLARISWARE_PATH} -DPART_$(PART) -c -DTARGET_IS_BLIZZARD_RA1 -Dgcc
-
-# Set this to enable debug via UART
-ifeq ($(DEBUGUART),1)
-CFLAGS+= -DDEBUGUART
-endif
-
-# Set this to disable firmware dumping (i.e. reading via MSC)
-ifeq ($(NOREAD),1)
-CFLAGS+= -DNOREAD
-endif
-
-# Set this to enable check at start whether the firmware has been cryptographically signed
-ifeq ($(CRYPTO),1)
-CFLAGS+= -DCRYPTO
-endif
 
 # Flags for LD
 LFLAGS  = --gc-sections -L /opt/arm-2011.03/lib/gcc-lm4f/ -lgcc -ldriver
@@ -140,11 +126,25 @@ ${PROJECT_NAME}: ${PROJECT_NAME}.axf
 	@echo Binary size:
 	${PREFIX_ARM}-size ${PROJECT_NAME}.axf
 
+openocd: ${PROJECT_NAME}.axf ${PROJECT_NAME}
+	openocd -f ${OPENOCD_PART} $ 1>/dev/null 2>/dev/null &
+
+flash: ${PROJECT_NAME}.axf ${PROJECT_NAME} openocd
+	@echo flashing board
+	@./telnet.py "halt" "flash write_image erase ${PROJECT_NAME}.axf" 
+	@echo flashing done
+uart:
+	@./telnet.py "reset run"
+	@screen /dev/lm4f 115200
+
+gdb: ${PROJECT_NAME}.axf ${PROJECT_NAME} openocd
+	@./telnet.py "halt"
+	${PREFIX_ARM}-gdb ${PROJECT_NAME}.axf -ex "target remote localhost:3333"
+
+flash+gdb: flash gdb
+flash+uart: flash uart
+
 # make clean rule
 clean:
 	rm -f *.bin *.o *.d *.axf *.lst
 
-# Rule to load the project to the board
-# I added a sudo because it's needed without a rule.
-flash:
-	${FLASHER} ${FLASHER_FLAGS} ${PROJECT_NAME}.bin
