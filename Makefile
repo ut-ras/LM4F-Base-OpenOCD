@@ -39,6 +39,7 @@ PREFIX_ARM = arm-none-eabi
 
 # Microcontroller properties.
 PART=LM4F120
+SPECIFIC_PART=${PART}H5QR
 OPENOCD_PART =  ${shell find /usr/share/openocd/scripts/ -iname *${PART}*}
 CPU=-mcpu=cortex-m4
 FPU=-mfpu=fpv4-sp-d16 -mfloat-abi=softfp
@@ -58,10 +59,10 @@ OD      = ${PREFIX_ARM}-objdump
 # Option arguments for C compiler.
 CFLAGS=-mthumb ${CPU} ${FPU} -Os -ffunction-sections -fdata-sections -MD -std=c99 -Wall -pedantic -c -g
 # Library stuff passed as flags!
-CFLAGS+= -I ${STELLARISWARE_PATH} -DPART_$(PART) -c -DTARGET_IS_BLIZZARD_RA1 -Dgcc
+CFLAGS+= -I ${STELLARISWARE_PATH} -DPART_$(SPECIFIC_PART) -c -DTARGET_IS_BLIZZARD_RA1 -Dgcc
 
 # Flags for LD
-LFLAGS  = --gc-sections -L /opt/arm-2011.03/lib/gcc-lm4f/ -lgcc -ldriver
+LFLAGS  = --gc-sections -L /opt/arm-2011.03/lib/gcc-lm4f/ -lgcc -lutils -ldriver 
 
 # Flags for objcopy
 CPFLAGS = -Obinary
@@ -113,7 +114,7 @@ all: $(OBJS) ${PROJECT_NAME}.axf ${PROJECT_NAME}
 ${PROJECT_NAME}.axf: $(OBJS)
 	@echo
 	@echo Linking...
-	$(LD) -T $(LINKER_FILE) $(LFLAGS) -o ${PROJECT_NAME}.axf $(OBJS)
+	$(LD) -T $(LINKER_FILE)  -o ${PROJECT_NAME}.axf $(OBJS) $(LFLAGS)
 
 ${PROJECT_NAME}: ${PROJECT_NAME}.axf
 	@echo
@@ -128,21 +129,25 @@ ${PROJECT_NAME}: ${PROJECT_NAME}.axf
 
 openocd: ${PROJECT_NAME}.axf ${PROJECT_NAME}
 	openocd -f ${OPENOCD_PART} $ 1>/dev/null 2>/dev/null &
+killopenocd:
+	@killall openocd || true
 
 flash: ${PROJECT_NAME}.axf ${PROJECT_NAME} openocd
 	@echo flashing board
 	@./telnet.py "halt" "flash write_image erase ${PROJECT_NAME}.axf" 
 	@echo flashing done
-uart:
+_uart:
 	@./telnet.py "reset run"
 	@screen /dev/lm4f 115200
 
-gdb: ${PROJECT_NAME}.axf ${PROJECT_NAME} openocd
-	@./telnet.py "halt"
+_gdb: ${PROJECT_NAME}.axf ${PROJECT_NAME} openocd
+	@./telnet.py "reset halt"
 	${PREFIX_ARM}-gdb ${PROJECT_NAME}.axf -ex "target remote localhost:3333"
 
-flash+gdb: flash gdb
-flash+uart: flash uart
+gdb: openocd _gdb killopenocd
+flash+gdb: openocd flash _gdb killopenocd
+uart: openocd _uart killopenocd
+flash+uart: openocd flash _uart killopenocd
 
 # make clean rule
 clean:
