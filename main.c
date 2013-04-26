@@ -57,15 +57,11 @@ int main(void){
   TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
   TimerEnable(TIMER0_BASE, TIMER_A);
 
-  //enable line sensors
-  lineSensorInit();
-
   while(1){
     unsigned long charic;
     UARTprintf("\r\nBlinkey Led demo!\r\n");
     UARTprintf("1 : toggle led \r\n");
     UARTprintf("2 : toggle led toggling via a timer =P\r\n");
-    UARTprintf("3 : scan I2C bus\r\n");
     UARTprintf(">");
     UARTprintf("%c\n",(unsigned char) (charic = UARTgetc()));
     switch (charic){
@@ -77,9 +73,6 @@ int main(void){
       break;
     case '2':
       led_toggle ^= 1;
-      break;
-    case '3':
-      scanI2C(I2C1_MASTER_BASE);
       break;
     default:
       UARTprintf("invalid input: %c", (unsigned char) charic);
