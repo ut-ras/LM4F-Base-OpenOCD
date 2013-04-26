@@ -32,6 +32,7 @@
 
 #include <StellarisWare/hw_nvic.h>
 #include <StellarisWare/hw_types.h>
+#include "blinky.h"
 
 
 //-----------------------------------------------------------------------------
@@ -73,12 +74,12 @@ void(* myvectors[])(void) = {
   // This are the fixed priority interrupts and the stack pointer loaded at startup at R13 (SP).
   //                        VECTOR N (Check Datasheet)
   // here the compiler it's boring.. have to figure that out
-    (void (*)) &_estack, 
+  (void (*)(void)) &_estack, 
                 // stack pointer should be 
               // placed here at startup.      0
     rst_handler,      // code entry point         1
     nmi_handler,      // NMI handler.           2
-    hardfault_handler,    // hard fault handler.        3
+  (void (*)(void)) hardfault_handler,    // hard fault handler.        3
     // Configurable priority interruts handler start here.
     empty_def_handler,    // Memory Management Fault      4
     empty_def_handler,    // Bus Fault            5
@@ -112,7 +113,7 @@ void(* myvectors[])(void) = {
     empty_def_handler,    // ADC 0 Seq 2            32
     empty_def_handler,    // ADC 0 Seq 3            33
     empty_def_handler,    // WDT 0 and 1            34
-    empty_def_handler,    // 16/32 bit timer 0 A        35
+    BlinkyLedHandler,    // 16/32 bit timer 0 A        35
     empty_def_handler,    // 16/32 bit timer 0 B        36
     empty_def_handler,    // 16/32 bit timer 1 A        37
     empty_def_handler,    // 16/32 bit timer 1 B        38
@@ -300,9 +301,36 @@ void nmi_handler(void){
 }
 
 // Hard fault handler code NVIC 3
-void hardfault_handler( unsigned int * hardfault_args ){
-  // Just loop forever, so if you want to debug the processor it's running.
-  while (1) { }
+__attribute__((naked))
+ void hardfault_handler( unsigned int * hardfault_args ){
+  __asm(" .syntax unified\n"
+    "movs r0, #4\n"
+    "mov r1, lr\n"
+    "tst r0, r1\n"
+    "beq _MSP\n"
+    "MRS r0, PSP\n"
+    "B Hardfault_HandlerC\n"
+  "_MSP:\n"
+    "MRS r0, msp\n"
+    "B Hardfault_HandlerC\n");
+}
+
+void Hardfault_HandlerC(unsigned long *hardfault_args){
+  volatile unsigned long stacked_r0 = hardfault_args[0];
+  volatile unsigned long stacked_r1 = hardfault_args[1];
+  volatile unsigned long stacked_r2 = hardfault_args[2];
+  volatile unsigned long stacked_r3 = hardfault_args[3];
+  volatile unsigned long stacked_r12 = hardfault_args[4];
+  volatile unsigned long stacked_lr = hardfault_args[5];
+  volatile unsigned long stacked_pc = hardfault_args[6];
+  volatile unsigned long stacked_psr = hardfault_args[7];
+  volatile unsigned long _CFSR = *((volatile unsigned long*) 0xE000ED28);
+  volatile unsigned long _HFSR = *((volatile unsigned long*) 0xE000ED2C);
+  volatile unsigned long _DFSR = *((volatile unsigned long*) 0xE000ED30);
+  volatile unsigned long _AFSR = *((volatile unsigned long*) 0xE000ED3C);
+  volatile unsigned long _BFAR = *((volatile unsigned long*) 0xE000ED38);
+  volatile unsigned long _MMAR = *((volatile unsigned long*) 0xE000ED34);
+  __asm("BKPT #0\n");
 }
 
 void empty_def_handler(void){

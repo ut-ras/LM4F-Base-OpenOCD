@@ -80,9 +80,6 @@ LIBM_PATH=${shell ${CC} ${CFLAGS} -print-file-name=libm.a}
 # Uploader tool path.
 # Set a relative or absolute path to the upload tool program.
 # I used this project: https://github.com/utzig/lm4tools
-FLASHER=lm4flash
-# Flags for the uploader program.
-FLASHER_FLAGS=
 
 #==============================================================================
 #                         Project properties
@@ -96,7 +93,7 @@ STARTUP_FILE = LM4F_startup
 LINKER_FILE = LM4F.ld
 
 
-SRC = LM4F_startup.c main.c
+SRC = LM4F_startup.c main.c line-sensors.c
 OBJS = $(SRC:.c=.o)
 
 #==============================================================================
@@ -134,7 +131,7 @@ killopenocd:
 
 flash: ${PROJECT_NAME}.axf ${PROJECT_NAME} openocd
 	@echo flashing board
-	@./telnet.py "halt" "flash write_image erase ${PROJECT_NAME}.axf" 
+	@./telnet.py "halt" "program ${PROJECT_NAME}.axf verify reset" 
 	@echo flashing done
 _uart:
 	@./telnet.py "reset run"
@@ -150,6 +147,6 @@ uart: openocd _uart killopenocd
 flash+uart: openocd flash _uart killopenocd
 
 # make clean rule
-clean:
+clean: killopenocd
 	rm -f *.bin *.o *.d *.axf *.lst
 
