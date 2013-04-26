@@ -45,7 +45,9 @@ CPU=-mcpu=cortex-m4
 FPU=-mfpu=fpv4-sp-d16 -mfloat-abi=softfp
 
 # Stellarisware path
-STELLARISWARE_PATH=/opt/arm-2011.03/include/
+STELLAIRSWARE_BASE=/opt/arm-2011.03/
+STELLARISWARE_PATH=${STELLARISWARE_BASE}include/
+STELLARISWARE_LIBS=${STELLARISWARE_BASE}gcc-lm4f/
 
 # Program name definition for ARM GNU C compiler.
 CC      = ${PREFIX_ARM}-gcc
@@ -62,7 +64,7 @@ CFLAGS=-mthumb ${CPU} ${FPU} -Os -ffunction-sections -fdata-sections -MD -std=c9
 CFLAGS+= -I ${STELLARISWARE_PATH} -DPART_$(SPECIFIC_PART) -c -DTARGET_IS_BLIZZARD_RA1 -Dgcc
 
 # Flags for LD
-LFLAGS  = --gc-sections -L /opt/arm-2011.03/lib/gcc-lm4f/ -lgcc -lutils -ldriver 
+LFLAGS  = --gc-sections -L ${STELLARISWARE_LIBS} -lgcc -ldriver 
 
 # Flags for objcopy
 CPFLAGS = -Obinary
@@ -93,7 +95,7 @@ STARTUP_FILE = LM4F_startup
 LINKER_FILE = LM4F.ld
 
 
-SRC = LM4F_startup.c main.c line-sensors.c
+SRC = LM4F_startup.c main.c 
 OBJS = $(SRC:.c=.o)
 
 #==============================================================================
