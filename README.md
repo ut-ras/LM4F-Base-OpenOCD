@@ -4,7 +4,9 @@ LM4F-MSC-BASE
 INSTALLATION:
 
 * install the openocd from git to have the icdi interface
+    for arch users found at <https://aur.archlinux.org/packages/openocd-git/>
 * install the arm-none-eabi toolchain and add it to your path
+    for arch users found in at <https://aur.archlinux.org/packages/?O=0&C=0&SeB=nd&K=cross-arm-none&outdated=&SB=n&SO=a&PP=50&do_Search=Go>
 * Run make
 * Run make flash
 * Run make gdb to get a debugging terminal

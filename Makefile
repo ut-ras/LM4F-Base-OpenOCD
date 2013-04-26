@@ -28,6 +28,8 @@
 # Version:      1.0.0
 # Description:  Sample makefile
 
+# Modified since by Jimmy Brisson
+
 #==============================================================================
 #           Cross compiling toolchain / tools specifications
 #==============================================================================
@@ -45,9 +47,9 @@ CPU=-mcpu=cortex-m4
 FPU=-mfpu=fpv4-sp-d16 -mfloat-abi=softfp
 
 # Stellarisware path
-STELLAIRSWARE_BASE=/opt/arm-2011.03/
-STELLARISWARE_PATH=${STELLARISWARE_BASE}include/
-STELLARISWARE_LIBS=${STELLARISWARE_BASE}gcc-lm4f/
+STELLARISWARE_BASE=/opt/arm-2011.03/
+STELLARISWARE_INC=${STELLARISWARE_BASE}include/
+STELLARISWARE_LIBS=${STELLARISWARE_BASE}lib/gcc-lm4f/
 
 # Program name definition for ARM GNU C compiler.
 CC      = ${PREFIX_ARM}-gcc
@@ -61,10 +63,10 @@ OD      = ${PREFIX_ARM}-objdump
 # Option arguments for C compiler.
 CFLAGS=-mthumb ${CPU} ${FPU} -Os -ffunction-sections -fdata-sections -MD -std=c99 -Wall -pedantic -c -g
 # Library stuff passed as flags!
-CFLAGS+= -I ${STELLARISWARE_PATH} -DPART_$(SPECIFIC_PART) -c -DTARGET_IS_BLIZZARD_RA1 -Dgcc
+CFLAGS+= -I ${STELLARISWARE_INC} -DPART_$(SPECIFIC_PART) -c -DTARGET_IS_BLIZZARD_RA1 -Dgcc
 
 # Flags for LD
-LFLAGS  = --gc-sections -L ${STELLARISWARE_LIBS} -lgcc -ldriver 
+LFLAGS  = --gc-sections -L $(STELLARISWARE_LIBS) -lgcc -ldriver 
 
 # Flags for objcopy
 CPFLAGS = -Obinary

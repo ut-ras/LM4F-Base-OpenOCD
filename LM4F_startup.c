@@ -32,7 +32,6 @@
 
 #include <StellarisWare/hw_nvic.h>
 #include <StellarisWare/hw_types.h>
-#include "blinky.h"
 
 
 //-----------------------------------------------------------------------------
@@ -113,7 +112,7 @@ void(* myvectors[])(void) = {
     empty_def_handler,    // ADC 0 Seq 2            32
     empty_def_handler,    // ADC 0 Seq 3            33
     empty_def_handler,    // WDT 0 and 1            34
-    BlinkyLedHandler,    // 16/32 bit timer 0 A        35
+    empty_def_handler,    // 16/32 bit timer 0 A        35
     empty_def_handler,    // 16/32 bit timer 0 B        36
     empty_def_handler,    // 16/32 bit timer 1 A        37
     empty_def_handler,    // 16/32 bit timer 1 B        38
