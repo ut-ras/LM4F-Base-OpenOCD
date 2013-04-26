@@ -131,11 +131,11 @@ ${PROJECT_NAME}: ${PROJECT_NAME}.axf
 openocd: ${PROJECT_NAME}.axf ${PROJECT_NAME}
 	openocd -f ${OPENOCD_PART} $ 1>/dev/null 2>/dev/null &
 killopenocd:
-	@killall openocd || true
+	@./telnet.py "shutdown"
 
 flash: ${PROJECT_NAME}.axf ${PROJECT_NAME} openocd
 	@echo flashing board
-	@./telnet.py "halt" "program ${PROJECT_NAME}.axf verify reset" 
+	@./telnet.py "halt" "write_image erase ${PROJECT_NAME}.axf" "verify_image ${PROJECT_NAME}.axf" 
 	@echo flashing done
 _uart:
 	@./telnet.py "reset run"
