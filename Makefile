@@ -47,7 +47,7 @@ CPU=-mcpu=cortex-m4
 FPU=-mfpu=fpv4-sp-d16 -mfloat-abi=softfp
 
 # Stellarisware path
-STELLARISWARE_BASE=/opt/arm-2011.03/
+STELLARISWARE_BASE=Stellarisware/
 STELLARISWARE_INC=${STELLARISWARE_BASE}include/
 STELLARISWARE_LIBS=${STELLARISWARE_BASE}lib/gcc-lm4f/
 

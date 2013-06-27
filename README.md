@@ -20,6 +20,7 @@ INSTALLATION:
 
 StellarisWare:
 
+* download Stellarisware: <http://www.ti.com/tool/sw-lm3s>  
 * compile StellarisWare as a library.
 * tell the makefile where the library is with the 'STELLARISWARE_LIBS' variable
 * tell the makefile where the header files are with the 'SELLARISWARE_INC' variable
